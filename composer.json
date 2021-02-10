@@ -1,6 +1,6 @@
 {
     "name": "spoonity/common",
-    "description": "Simple library of common project classes packaged for re-use.",
+    "description": "Simple library of common project classes and services packaged for re-use.",
     "type": "library",
     "authors": [
         {
