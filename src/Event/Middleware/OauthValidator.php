@@ -5,7 +5,7 @@ namespace Spoonity\Event\Middleware;
 
 
 use Spoonity\Exception;
-use Spoonity\Service\OauthService;
+use Spoonity\Service\AccountsService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Loader\YamlFileLoader;
 use Symfony\Component\Config\FileLocator;
@@ -22,18 +22,18 @@ class OauthValidator
     /** @var ContainerInterface  */
     private $container;
 
-    /** @var OauthService  */
-    private $oauthService;
+    /** @var AccountsService  */
+    private $accountsService;
 
     /**
      * OauthValidator constructor.
      * @param ContainerInterface $container
-     * @param OauthService $oauthService
+     * @param AccountsService $accountsService
      */
-    public function __construct(ContainerInterface $container, OauthService $oauthService)
+    public function __construct(ContainerInterface $container, AccountsService $accountsService)
     {
         $this->container = $container;
-        $this->oauthService = $oauthService;
+        $this->accountsService = $accountsService;
     }
 
     /**
@@ -59,22 +59,25 @@ class OauthValidator
         }
 
         /**
+         * get the token details from the accounts service.
+         * tokens will look like;
+         * {"token": "xxx", "vendor": {"vendor_id": 123, "name": "Acme Corp"}, "date_created": 123, "date_updated": 456},
+         */
+        $data = $this->accountsService->validateToken(trim(str_replace('Bearer', '', $event->getRequest()->headers->get('Authorization'))));
+
+        /**
+         * attach the token data to the request.
+         */
+        $event->getRequest()->attributes->set('oauth_token', $data);
+
+        /**
          * skip check for routes with empty or missing oauth_scopes.
          */
         if($route->getOption('oauth_scopes') == null) {
             return;
         }
 
-        /**
-         * get the token details from the accounts service.
-         */
-        $data = $this->oauthService->getTokenDetails(trim(str_replace('Bearer', '', $event->getRequest()->headers->get('Authorization'))));
         $isScoped = true;
-
-        /**
-         * attach the token data to the request.
-         */
-        $event->getRequest()->attributes->set('oauth_token', $data);
 
         /**
          * if root client, skip this process.
