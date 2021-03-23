@@ -16,13 +16,12 @@ namespace Spoonity\Entity\Abstraction;
 trait Respondent
 {
     /**
-     * @return int
+     * @return int|null
      */
-    public abstract function getId(): int;
+    public abstract function getId(): ?int;
 
     /**
      * @return array
-     * @throws \ReflectionException
      */
     public function getResponse(): array
     {
@@ -58,7 +57,7 @@ trait Respondent
             /**
              * grab all of the properties and create a response array.
              */
-            if($reflection->getMethod($methodName)) {
+            if($reflection->hasMethod($methodName)) {
                 if(!is_object($this->$methodName())) {
                     $value = $this->$methodName();
 

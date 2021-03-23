@@ -4,6 +4,8 @@
 namespace Spoonity\Service;
 
 
+use Spoonity\Entity\User;
+use Spoonity\Entity\Vendor;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -67,5 +69,32 @@ class AccountsService
         }
 
         return ($result != null) ? json_decode($result, true) : null;
+    }
+
+    /**
+     * @param int $userId
+     * @return User|null
+     */
+    public function getUser(int $userId): ?User
+    {
+        // TODO: implement me
+        return new User(
+            $userId,
+            'scott@spoonity.com',
+            'Scott',
+            'Côté',
+            ['+16132980281'],
+            ['arn:aws:sns:us-east-1:145357958474:endpoint/APNS/106292_CuttersPoint_APNS/c5be10fc-0dc4-3cd8-9740-d13610f86cdc']
+        );
+    }
+
+    /**
+     * @param int $vendorId
+     * @return Vendor|null
+     */
+    public function getVendor(int $vendorId): ?Vendor
+    {
+        // TODO: implement me
+        return new Vendor($vendorId, 'Spoonity', 'support@spoonity.com');
     }
 }
