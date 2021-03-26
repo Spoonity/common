@@ -24,7 +24,7 @@ abstract class BaseController extends AbstractController
      */
     public function getPage(Request $request): int
     {
-        return ($request->query->has('page')) ? $request->query->get('page') : 1;
+        return $request->query->has('page') ? $request->query->get('page') : 1;
     }
 
     /**
@@ -34,7 +34,17 @@ abstract class BaseController extends AbstractController
      */
     public function getLimit(Request $request, int $limit = 50): int
     {
-        return ($request->query->has('limit')) ? $request->query->get('limit') : $limit;
+        return $request->query->has('limit') ? $request->query->get('limit') : $limit;
+    }
+
+    /**
+     * @param Request $request
+     * @param int $limit
+     * @return int
+     */
+    public function getOffset(Request $request, int $limit = 50): int
+    {
+        return ($this->getPage($request) - 1) * $this->getLimit($request, $limit);
     }
 
     /**
@@ -44,10 +54,10 @@ abstract class BaseController extends AbstractController
      */
     public function getOrder(Request $request, array $order = []): array
     {
-        if($request->query->has('order')) {
+        if ($request->query->has('order')) {
             $parts = explode(':', $request->query->get('order'));
 
-            if(sizeof($parts) === 2) {
+            if (sizeof($parts) === 2) {
                 $order = [$parts[0] => $parts[1]];
             }
         }
