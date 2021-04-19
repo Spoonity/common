@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Class TranslatorService
- * @package App\Service
+ * @package Spoonity\Service
  */
 class TranslatorService
 {
