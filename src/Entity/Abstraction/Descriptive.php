@@ -23,7 +23,7 @@ trait Descriptive
     /**
      * @return int
      */
-    public abstract function getId(): int;
+    public abstract function getId(): ?int;
 
     /**
      * @param string $field
