@@ -93,7 +93,7 @@ trait Descriptive
      * @param string $field
      * @return bool
      */
-    public function deleteMeta(string $field)
+    public function deleteMeta(string $field): bool
     {
         /** @var Kernel $kernel */
         global $kernel;
@@ -106,6 +106,10 @@ trait Descriptive
                 'field' => $field
             ])
         ;
+
+        if($meta === null) {
+            return false;
+        }
 
         return $meta->delete();
     }
