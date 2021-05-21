@@ -65,7 +65,7 @@ trait Persistent
         } catch(\Doctrine\DBAL\Exception\NotNullConstraintViolationException $e) {
             throw new Exception\DbException($e->getMessage());
 
-        } catch(\Exception $e) {
+        } catch(\Doctrine\DBAL\Exception $e) {
             /**
              * unexpected doctrine error override output in dev environment.
              */
