@@ -4,6 +4,7 @@
 namespace Spoonity\Service\Abstraction;
 
 
+use Spoonity\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -30,8 +31,82 @@ abstract class BaseSearchService
      * @param int $limit
      * @param array $order
      * @return array
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
-    public abstract function search(string $query, int $offset, int $limit, array $order = []): array;
+    public function search(string $query, int $offset, int $limit, array $order = []): array
+    {
+        $entities = [];
+        $criteria = [];
+        $matches = [];
+
+        /**
+         * break the query into blocks of criteria to be evaluated.
+         */
+        preg_match_all($this->getSearchExpression(), $query, $matches);
+
+        foreach($matches as $items) {
+            foreach($items as $item) {
+                $parts = explode(':', $item);
+
+                if(sizeof($parts) !== 2) {
+                    continue;
+                }
+
+                $criteria[$parts[0]][] = $parts[1];
+            }
+        }
+
+        /**
+         * get search-friendly base query.
+         */
+        $stmt = $this->getManager()->getConnection()->prepare(sprintf("
+            SELECT DISTINCT e.id %s
+            FROM %s e
+            INNER JOIN (
+                %s
+            ) q ON q.id=e.id
+            WHERE true
+            %s
+            %s
+            LIMIT %d, %d
+            ;
+        ", (!empty($order)) ? sprintf(", q.%s", array_keys($order)[0]): '', $this->getEntityTableName(), $this->getSearchInnerQuery(), $this->evaluateCriteriaAsSql($criteria), $this->evaluateOrder($order), $offset, $limit));
+
+        if(!$stmt->execute()) {
+            throw new Exception\DbException();
+        }
+
+        $results = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+        foreach($results as $result) {
+            $entities[] = $this->getManager()->getRepository($this->getEntityClassName())->find($result);
+        }
+
+        return $entities;
+    }
+
+    /**
+     * @return string
+     */
+    protected abstract function getSearchExpression(): string;
+
+    /**
+     * @return string
+     */
+    protected abstract function getEntityClassName(): string;
+
+    /**
+     * @return string
+     */
+    private function getEntityTableName(): string
+    {
+        return $this->manager->getClassMetadata($this->getEntityClassName())->getTableName();
+    }
+
+    /**
+     * @return string
+     */
+    protected abstract function getSearchInnerQuery(): string;
 
     /**
      * @param array $criteria
