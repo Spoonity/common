@@ -12,13 +12,16 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class IdentityService
 {
+    const CREDENTIAL_TYPE_TRANSACTIONAL = 'transactional';
+    const CREDENTIAL_TYPE_WAREHOUSE = 'warehouse';
+
     /**
      * @param int $identityId
      * @param string $token
      * @return array|null
      * @throws \Exception
      */
-    public function getCredentials(int $identityId, string $token): ?array
+    public function getCredentials(int $identityId, string $token, string $type = self::CREDENTIAL_TYPE_TRANSACTIONAL): ?array
     {
         $ch = curl_init();
 
@@ -27,7 +30,10 @@ class IdentityService
             sprintf('Authorization: Bearer %s', $token)
         ]);
 
-        curl_setopt($ch, CURLOPT_URL, sprintf("https://identity.spoonity.com/identities/%d/credentials", $identityId));
+        curl_setopt($ch, CURLOPT_URL, sprintf("https://identity.spoonity.com/identities/%d/credentials?q=t:%s",
+            $identityId,
+            $type
+        ));
 
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
