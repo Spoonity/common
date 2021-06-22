@@ -72,8 +72,7 @@ abstract class BaseIdentityConnector
             'dbname' => $credentials['database_name'],
             'user' => $credentials['username'],
             'password' => $credentials['password'],
-            //'host' => $credentials['hostname'],
-            'host' => $credentials['proxy_ip'],
+            'host' => (getenv('KUBERNETES_SERVICE_HOST') != null) ? $credentials['proxy_ip'] : $credentials['hostname'],
             'driver' => 'pdo_mysql'
         ]);
 
