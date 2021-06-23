@@ -124,6 +124,13 @@ class ValidatorService
                     is_array($params['in']) &&
                     !in_array($node[$field], $params['in'])
                 ) {
+                    if(
+                        $nullable &&
+                        $node[$field] === null
+                    ) {
+                        continue;
+                    }
+
                     throw new Exception\InvalidFieldException(sprintf('Invalid field value for %s%s; must be one of %s',
                         ($child != null) ? sprintf('%s.', $child) : '',
                         $field,
