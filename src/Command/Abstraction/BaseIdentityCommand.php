@@ -124,7 +124,7 @@ abstract class BaseIdentityCommand extends BaseCommand
 
                 putenv(sprintf("DATABASE_URL=%s", $databaseUrl));
 
-                exec($this->getCronCommand(), $result, $exitCode);
+                exec(sprintf("php bin/console %s", $this->getCronCommand()), $result, $exitCode);
 
                 if($exitCode !== 0) {
                     $output->writeln(sprintf("<error>Error: %d</error>", $exitCode));
