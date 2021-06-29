@@ -33,6 +33,27 @@ abstract class BaseIdentityCommand extends BaseCommand
         parent::__construct($container, $accountsService);
     }
 
+    public function configure()
+    {
+        $pieces = explode(':', $this->getCronCommand());
+
+        if(is_array($pieces)) {
+            $executionName = [];
+
+            for($i=0; $i<sizeof($pieces); $i++) {
+                if($i === 1) {
+                    $executionName[] = 'identity';
+                }
+
+                $executionName[] = $pieces[$i];
+            }
+
+            $this->setName(implode(':', $executionName));
+        }
+
+        parent::configure();
+    }
+
     /**
      * @return string
      */
@@ -98,7 +119,7 @@ abstract class BaseIdentityCommand extends BaseCommand
                     $credentials['password'],
                     (getenv('KUBERNETES_SERVICE_HOST') != null) ? $credentials['proxy_ip'] : $credentials['hostname'],
                     $credentials['port'],
-                    $credentials['database_name'],
+                    $credentials['database_name']
                 );
 
                 putenv(sprintf("DATABASE_URL=%s", $databaseUrl));
