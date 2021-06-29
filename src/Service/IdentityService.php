@@ -17,10 +17,12 @@ class IdentityService
 
     /**
      * @param string $token
+     * @param int $page
+     * @param int $limit
      * @return array|null
      * @throws \Exception
      */
-    public function getIdentities(string $token): ?array
+    public function getIdentities(string $token, int $page = 1, int $limit = 10): ?array
     {
         $ch = curl_init();
 
@@ -29,7 +31,7 @@ class IdentityService
             sprintf('Authorization: Bearer %s', $token)
         ]);
 
-        curl_setopt($ch, CURLOPT_URL, 'https://identity.spoonity.com/identities/');
+        curl_setopt($ch, CURLOPT_URL, sprintf("https://identity.spoonity.com/identities/?page=%d&limit=%d", $page, $limit));
 
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
