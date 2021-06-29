@@ -97,7 +97,8 @@ abstract class BaseIdentityCommand extends BaseCommand
             foreach($identities['items'] as $identity) {
                 $credentials = $this->identityService->getCredentials($identity['id'], $token, IdentityService::CREDENTIAL_TYPE_WAREHOUSE);
 
-                $output->write(sprintf("Running reporting:process-schedule for %s(%d): ",
+                $output->write(sprintf("Running %s for %s(%d): ",
+                    $this->getCronCommand(),
                     $identity['name'],
                     $identity['id']
                 ));
@@ -139,7 +140,7 @@ abstract class BaseIdentityCommand extends BaseCommand
 
         $endTime = hrtime(true);
 
-        $output->writeln(sprintf("Schedules processed, took %d seconds",
+        $output->writeln(sprintf("Execution complete, took %d seconds",
             round((($endTime - $startTime) / 1000000000), 4)
         ));
 
