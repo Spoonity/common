@@ -83,6 +83,7 @@ class JsonResponse extends \Symfony\Component\HttpFoundation\JsonResponse
          * build URLs.
          */
         $endpoint = explode('?', $request->getUri())[0];
+        $endpoint = preg_replace('/^http:/', 'https:', $endpoint);
 
         $prev = sprintf('%s?%s', $endpoint, http_build_query(array_merge($query, [
             'page' => $page - 1,
