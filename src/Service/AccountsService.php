@@ -28,7 +28,7 @@ class AccountsService
             sprintf('Authorization: Bearer %s', $token)
         ]);
 
-        curl_setopt($ch, CURLOPT_URL, 'https://accounts.spoonity.com/api/validate');
+        curl_setopt($ch, CURLOPT_URL, 'https://accounts-na.spoonity.com/api/validate');
 
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
