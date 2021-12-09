@@ -31,7 +31,9 @@ class CommsService
             'subject' => $subject,
             'body' => $body,
             'recipients' => [
-                'email_address' => $to
+                [
+                    'email_address' => $to
+                ]
             ]
         ]);
 
