@@ -20,7 +20,7 @@ use Symfony\Component\Yaml\Exception\ParseException;
 class OauthValidator
 {
     /** @var ContainerInterface  */
-    private $container;
+    protected $container;
 
     /** @var AccountsService  */
     private $accountsService;
