@@ -2,93 +2,130 @@
 
 namespace Spoonity\Entity;
 
+use League\OAuth2\Server\Entities\UserEntityInterface;
+use Spoonity\Entity\Abstraction\Dated;
+use Spoonity\Entity\Abstraction\Descriptive;
+use Spoonity\Entity\Abstraction\Persistent;
+use Spoonity\Entity\Abstraction\Respondent;
+use Spoonity\Entity\Abstraction\Statused;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+
 /**
  * Class User
  * @package Spoonity\Entity
  */
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface, UserEntityInterface
 {
-    /** @var int|null */
-    private $userId;
+    use Dated, Statused, Descriptive, Persistent, Respondent;
 
-    /** @var string|null */
-    private $emailAddress;
+    /** @var int|null  */
+    protected ?int $id = null;
 
-    /** @var string|null */
-    private $firstName;
+    /** @var string */
+    protected string $username;
 
-    /** @var string|null */
-    private $lastName;
+    /** @var string */
+    protected string $password;
 
-    /** @var string[] */
-    private $phoneNumbers;
-
-    /** @var string[] */
-    private $devices;
-
-    /**
-     * User constructor.
-     * @param int|null $userId
-     * @param string|null $emailAddress
-     * @param string|null $firstName
-     * @param string|null $lastName
-     * @param string[] $phoneNumbers
-     * @param string[] $devices
-     */
-    public function __construct(?int $userId, ?string $emailAddress, ?string $firstName = null, ?string $lastName = null, array $phoneNumbers = [], array $devices = [])
-    {
-        $this->userId = $userId;
-        $this->emailAddress = $emailAddress;
-        $this->firstName = $firstName;
-        $this->lastName = $lastName;
-        $this->phoneNumbers = $phoneNumbers;
-        $this->devices = $devices;
-    }
+    /** @var string|null  */
+    protected ?string $salt = null;
 
     /**
      * @return int|null
      */
-    public function getUserId(): ?int
+    public function getId(): ?int
     {
-        return $this->userId;
+        return $this->id;
     }
 
     /**
-     * @return string|null
+     * @return string
      */
-    public function getEmailAddress(): ?string
+    public function getUsername(): string
     {
-        return $this->emailAddress;
+        return $this->username;
     }
 
     /**
-     * @return string|null
+     * @param string $username
+     * @return $this
      */
-    public function getFirstName(): ?string
+    public function setUsername(string $username): self
     {
-        return $this->firstName;
+        $this->username = $username;
+
+        return $this;
     }
 
     /**
-     * @return string|null
+     * @return string
      */
-    public function getLastName(): ?string
+    public function getPassword(): string
     {
-        return $this->lastName;
+        return $this->password;
     }
 
     /**
-     * @return string[]
+     * @param string $plaintextPassword
+     * @return $this
+     * @throws \Exception
      */
-    public function getPhoneNumbers(): array
+    public function setPassword(string $plaintextPassword): self
     {
-        return $this->phoneNumbers;
+        if($this->salt == null) {
+            $this->salt = bin2hex(random_bytes(16));
+        }
+
+        /** @var \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher $encoder */
+        $encoder = $this->getContainer()->get('security.user_password_hasher');
+
+        $this->password = $encoder->hashPassword($this, $plaintextPassword);
+
+        return $this;
     }
 
     /**
-     * @return string[]
+     * @param string $plaintextPassword
+     * @return bool
      */
-    public function getDevices(): array
+    public function isPassword(string $plaintextPassword): bool
     {
-        return $this->devices;
-    }}
+        /** @var \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher $encoder */
+        $encoder = $this->getContainer()->get('security.user_password_hasher');
+
+        return $encoder->isPasswordValid($this, $plaintextPassword);
+    }
+
+    /**
+     * @return string
+     */
+    public function getSalt(): string
+    {
+        return $this->salt;
+    }
+
+    /**
+     * @return void
+     */
+    public function eraseCredentials()
+    {
+        return;
+    }
+
+    public function getRoles(): array
+    {
+        /**
+         * TODO: get roles from database RBAC system.
+         */
+        return [];
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return $this->getUsername();
+    }
+}
