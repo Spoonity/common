@@ -52,9 +52,13 @@ class OauthValidator
         $route = $this->getRouteConfig($routeIdentifier);
 
         /**
-         * skip if no route found.
+         * skip if no route found;
+         * or if it's the root path.
          */
-        if($route == null) {
+        if(
+            $route == null ||
+            $route->getPath() === '/'
+        ) {
             return;
         }
 
