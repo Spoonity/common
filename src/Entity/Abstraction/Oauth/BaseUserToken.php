@@ -48,6 +48,9 @@ abstract class BaseUserToken implements AccessTokenEntityInterface, RefreshToken
     /** @var Scope[]  */
     protected array $scopes = [];
 
+    /** @var array  */
+    protected array $identities = [];
+
     /**
      * @return int|null
      */
@@ -211,6 +214,25 @@ abstract class BaseUserToken implements AccessTokenEntityInterface, RefreshToken
     }
 
     /**
+     * @return array
+     */
+    public function getIdentities(): array
+    {
+        return $this->identities;
+    }
+
+    /**
+     * @param int $identityId
+     * @return $this
+     */
+    public function addIdentity(int $identityId): self
+    {
+        $this->identities[] = $identityId;
+
+        return $this;
+    }
+
+    /**
      * @return \DateTimeImmutable
      */
     public function getExpiryDateTime(): \DateTimeImmutable
@@ -297,6 +319,7 @@ abstract class BaseUserToken implements AccessTokenEntityInterface, RefreshToken
              * TODO: update User::getRoles() to return scopes here
              */
             ->withClaim('scopes', $this->getScopes())
+            ->withClaim('identities', $this->getIdentities())
             ->getToken($this->jwtConfiguration->signer(), $this->jwtConfiguration->signingKey())
             ;
     }
