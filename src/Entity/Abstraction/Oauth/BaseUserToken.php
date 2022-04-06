@@ -227,7 +227,7 @@ abstract class BaseUserToken implements AccessTokenEntityInterface, RefreshToken
      */
     public function setIdentityId(int $identityId): self
     {
-        $this->$identityId = $identityId;
+        $this->identityId = $identityId;
 
         return $this;
     }
