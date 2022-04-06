@@ -48,8 +48,8 @@ abstract class BaseUserToken implements AccessTokenEntityInterface, RefreshToken
     /** @var Scope[]  */
     protected array $scopes = [];
 
-    /** @var array  */
-    protected array $identities = [];
+    /** @var int|null  */
+    protected ?int $identityId = null;
 
     /**
      * @return int|null
@@ -214,20 +214,20 @@ abstract class BaseUserToken implements AccessTokenEntityInterface, RefreshToken
     }
 
     /**
-     * @return array
+     * @return int|null
      */
-    public function getIdentities(): array
+    public function getIdentityId(): ?int
     {
-        return $this->identities;
+        return $this->identityId;
     }
 
     /**
      * @param int $identityId
      * @return $this
      */
-    public function addIdentity(int $identityId): self
+    public function setIdentityId(int $identityId): self
     {
-        $this->identities[] = $identityId;
+        $this->$identityId = $identityId;
 
         return $this;
     }
@@ -319,7 +319,7 @@ abstract class BaseUserToken implements AccessTokenEntityInterface, RefreshToken
              * TODO: update User::getRoles() to return scopes here
              */
             ->withClaim('scopes', $this->getScopes())
-            ->withClaim('identities', $this->getIdentities())
+            ->withClaim('identity', $this->getIdentityId())
             ->getToken($this->jwtConfiguration->signer(), $this->jwtConfiguration->signingKey())
             ;
     }
