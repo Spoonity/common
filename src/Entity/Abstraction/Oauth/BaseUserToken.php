@@ -320,10 +320,6 @@ abstract class BaseUserToken implements AccessTokenEntityInterface, RefreshToken
              */
             ->withClaim('scopes', $this->getScopes())
             ->withClaim('identity', $this->getIdentityId())
-            ->withClaim('user', [
-                'id' => $this->getUser()->getId(),
-                'username' => $this->getUser()->getUsername()
-            ])
             ->getToken($this->jwtConfiguration->signer(), $this->jwtConfiguration->signingKey())
             ;
     }
