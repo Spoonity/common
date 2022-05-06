@@ -74,15 +74,16 @@ abstract class BaseOauthIdentityConnector
          */
         $credentials = $credentials['items'][0];
 
-        $connection = DriverManager::getConnection([
-            'dbname' => $credentials['database_name'],
-            'user' => $credentials['username'],
-            'password' => $credentials['password'],
-            'host' => (getenv('KUBERNETES_SERVICE_HOST') != null) ? $credentials['proxy_ip'] : $credentials['hostname'],
-            'driver' => 'pdo_mysql'
-        ]);
+        /** @var \Spoonity\DBAL\IdentityDbConnection $connection */
+        $connection = $this->container->get('doctrine.dbal.default_connection');
 
-        $this->container->set('doctrine.dbal.default_connection', $connection);
+        $connection->reconnect(
+            $credentials['database_name'],
+            $credentials['username'],
+            $credentials['password'],
+            (getenv('KUBERNETES_SERVICE_HOST') != null) ? $credentials['proxy_ip'] : $credentials['hostname'],
+            (getenv('KUBERNETES_SERVICE_HOST') != null) ? $credentials['proxy_port'] : $credentials['port']
+        );
     }
 
     /**
