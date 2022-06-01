@@ -11,6 +11,7 @@ use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 use Spoonity\Entity\Abstraction\Oauth\BaseUserToken;
 use Spoonity\Entity\Status;
 use Spoonity\Exception;
+use Spoonity\Service\JwtService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,31 +31,17 @@ class OauthAuthenticator extends AbstractAuthenticator
     /** @var ContainerInterface  */
     private ContainerInterface $container;
 
-    /** @var Configuration  */
-    private Configuration $jwtConfiguration;
+    /** @var JwtService  */
+    private JwtService $jwtService;
 
     /**
      * @param ContainerInterface $container
+     * @param JwtService $jwtService
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, JwtService $jwtService)
     {
         $this->container = $container;
-
-        /**
-         * prepare config for validating signed JWT with public key.
-         */
-        $this->jwtConfiguration = Configuration::forSymmetricSigner(
-            new Sha256(),
-            InMemory::plainText('')
-        );
-
-        $this->jwtConfiguration->setValidationConstraints(
-            new StrictValidAt(new SystemClock(new \DateTimeZone(\date_default_timezone_get()))),
-            new SignedWith(
-                new Sha256(),
-                InMemory::file(sprintf("file://%s", $this->container->getParameter('oauth')['public_key']))
-            )
-        );
+        $this->jwtService = $jwtService;
     }
 
     /**
@@ -81,7 +68,7 @@ class OauthAuthenticator extends AbstractAuthenticator
                 /**
                  * decode JWT from identifier.
                  */
-                $decodedJwt = $this->jwtConfiguration->parser()->parse($identifier);
+                $decodedJwt = $this->jwtService->decode($identifier);
                 $routeParams = $request->attributes->get('_route_params');
                 $routeScopes = $routeParams['oauth_scopes'] ?? [];
 
