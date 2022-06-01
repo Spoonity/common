@@ -28,7 +28,7 @@ trait Persistent
     /**
      * @return bool
      */
-    public function save()
+    public function save(): bool
     {
         $success = true;
         $action = ($this->getId() === null) ? 'insert' : 'update';
@@ -47,16 +47,25 @@ trait Persistent
                 }
             }
 
-            $this->getManager()->flush();
-
             /**
-             * fire after_insert or after_update events.
+             * prepare event dispatcher.
              */
             $event = new GenericEvent($this);
             $event->setArgument('previousValues', $previousValues);
 
             /** @var \Symfony\Component\EventDispatcher\EventDispatcher $dispatcher */
             $dispatcher = $this->getContainer()->get('event_dispatcher');
+
+            /**
+             * fire before_insert or before_update events.
+             **/
+            $dispatcher->dispatch($event, sprintf('api.%s.before_%s', strtolower($this->getEntityName()), $action));
+
+            $this->getManager()->flush();
+
+            /**
+             * fire after_insert or after_update events.
+             */
             $dispatcher->dispatch($event, sprintf('api.%s.after_%s', strtolower($this->getEntityName()), $action));
 
         } catch(\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
@@ -84,7 +93,7 @@ trait Persistent
      * @param bool $soft
      * @return bool
      */
-    public function delete(bool $soft = false)
+    public function delete(bool $soft = false): bool
     {
         $success = true;
 
@@ -145,39 +154,39 @@ trait Persistent
     }
 
     /**
-     * @return \Doctrine\ORM\EntityManager
+     * @return \Doctrine\ORM\EntityManagerInterface
      */
-    protected function getManager()
+    protected function getManager(): \Doctrine\ORM\EntityManagerInterface
     {
-        /** @var Kernel $kernel */
-        global $kernel;
+        /** @var Kernel $app */
+        global $app;
 
         /**
          * always ensure we have a fresh manager if
          * closed by an earlier exception.
          */
-        if(!$kernel->getContainer()->get('doctrine')->getManager()->isOpen()) {
-            $kernel->getContainer()->get('doctrine')->resetManager();
+        if(!$app->getContainer()->get('doctrine')->getManager()->isOpen()) {
+            $app->getContainer()->get('doctrine')->resetManager();
         }
 
-        return $kernel->getContainer()->get('doctrine')->getManager();
+        return $app->getContainer()->get('doctrine')->getManager();
     }
 
     /**
-     * @return null|\Symfony\Component\DependencyInjection\ContainerInterface
+     * @return \Symfony\Component\DependencyInjection\ContainerInterface|null
      */
-    protected function getContainer()
+    protected function getContainer(): ?\Symfony\Component\DependencyInjection\ContainerInterface
     {
-        /** @var Kernel $kernel */
-        global $kernel;
+        /** @var Kernel $app */
+        global $app;
 
-        return $kernel->getContainer();
+        return $app->getContainer();
     }
 
     /**
      * @return string
      */
-    protected function getEntityName()
+    protected function getEntityName(): string
     {
         return str_replace('App\Entity\\', '', self::class);
     }
