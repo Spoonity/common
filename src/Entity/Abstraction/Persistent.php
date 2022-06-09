@@ -162,6 +162,13 @@ trait Persistent
         global $app;
 
         /**
+         * handle console apps.
+         */
+        if(get_class($app) == 'Symfony\Bundle\FrameworkBundle\Console\Application') {
+            $app = $app->getKernel();
+        }
+
+        /**
          * always ensure we have a fresh manager if
          * closed by an earlier exception.
          */
@@ -179,6 +186,13 @@ trait Persistent
     {
         /** @var Kernel $app */
         global $app;
+
+        /**
+         * handle console apps.
+         */
+        if(get_class($app) == 'Symfony\Bundle\FrameworkBundle\Console\Application') {
+            $app = $app->getKernel();
+        }
 
         return $app->getContainer();
     }

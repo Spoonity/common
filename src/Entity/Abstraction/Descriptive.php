@@ -35,6 +35,13 @@ trait Descriptive
         /** @var Kernel $app */
         global $app;
 
+        /**
+         * handle console apps.
+         */
+        if(get_class($app) == 'Symfony\Bundle\FrameworkBundle\Console\Application') {
+            $app = $app->getKernel();
+        }
+
         $metaEntity = sprintf('%sMeta', ucfirst(self::class));
 
         /** @var Meta $meta */
@@ -59,6 +66,13 @@ trait Descriptive
     {
         /** @var Kernel $app */
         global $app;
+
+        /**
+         * handle console apps.
+         */
+        if(get_class($app) == 'Symfony\Bundle\FrameworkBundle\Console\Application') {
+            $app = $app->getKernel();
+        }
 
         $className = $this->getMetaClassName();
         $methodName = sprintf('set%s', ucfirst($this->getRootEntityName()));
@@ -122,6 +136,13 @@ trait Descriptive
     {
         /** @var Kernel $app */
         global $app;
+
+        /**
+         * handle console apps.
+         */
+        if(get_class($app) == 'Symfony\Bundle\FrameworkBundle\Console\Application') {
+            $app = $app->getKernel();
+        }
 
         if($this->metaTree !== null && !$force) {
             return $this->metaTree;
