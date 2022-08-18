@@ -65,7 +65,7 @@ abstract class BaseOauthIdentityConnector
         /**
          * TODO: connect to sandbox.
          */
-        if($credentials == null || sizeof($credentials) < 1) {
+        if($credentials == null || sizeof($credentials['items']) < 1) {
             throw new Exception\DbException('No usable credentials available for this identity');
         }
 
