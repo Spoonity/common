@@ -109,12 +109,12 @@ trait Descriptive
      */
     public function deleteMeta(string $field): bool
     {
-        /** @var Kernel $kernel */
-        global $kernel;
+        /** @var Kernel $app */
+        global $app;
 
         $className = $this->getMetaClassName();
 
-        $meta = $kernel->getContainer()->get('doctrine')->getManager()->getRepository($className)
+        $meta = $app->getContainer()->get('doctrine')->getManager()->getRepository($className)
             ->findOneBy([
                 $this->getRootEntityName() => $this->getId(),
                 'field' => $field
