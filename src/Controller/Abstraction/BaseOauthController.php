@@ -223,7 +223,7 @@ abstract class BaseOauthController extends BaseController
 
         } catch(OAuthServerException $e) {
             throw new Exception\OauthAuthorizationException(
-                sprintf("OAuth error: please check your request, or review our OAuth documentation at %s", $this->getParameter('misfitpixel.common.documentation.url')),
+                sprintf("OAuth error: please check your request, or review our OAuth documentation at %s", $this->getParameter('spoonity.common.documentation.url')),
                 $e->getHint()
             );
 
