@@ -123,11 +123,6 @@ abstract class BaseOauthController extends BaseController
             new \DateInterval('PT1H')
         );
 
-        $server->enableGrantType(
-            new ClientCredentialsGrant(),
-            new \DateInterval('PT1H')
-        );
-
         try {
             $authRequest = $server->validateAuthorizationRequest($this->convertToPsr($request));
 
