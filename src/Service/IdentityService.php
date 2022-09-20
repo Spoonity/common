@@ -31,7 +31,7 @@ class IdentityService
             sprintf('Authorization: Bearer %s', $token)
         ]);
 
-        curl_setopt($ch, CURLOPT_URL, sprintf("https://identity.spoonity.com/identities/?page=%d&limit=%d", $page, $limit));
+        curl_setopt($ch, CURLOPT_URL, sprintf("https://identity.spoonity.com/identities/all?page=%d&limit=%d", $page, $limit));
 
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
