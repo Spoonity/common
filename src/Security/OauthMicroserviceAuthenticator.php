@@ -83,6 +83,7 @@ class OauthMicroserviceAuthenticator extends AbstractAuthenticator
                 $decodedJwt = $this->jwtConfiguration->parser()->parse($identifier);
                 $routeParams = $request->attributes->get('_route_params');
                 $routeScopes = $routeParams['oauth_scopes'] ?? [];
+                $identityId = $decodedJwt->claims()->has('identity') ? $decodedJwt->claims()->get('identity') : null;
 
                 /**
                  * compare scopes on route with scopes on token.
@@ -93,6 +94,16 @@ class OauthMicroserviceAuthenticator extends AbstractAuthenticator
                      */
                     if($scope === 'root') {
                         $routeScopes = [];
+
+                        /**
+                         * root scope allows for identity override through headers.
+                         */
+                        if(
+                            $request->headers->has('identity') &&
+                            $identityId === null
+                        ) {
+                            $identityId = $request->headers->get('identity');
+                        }
 
                         break;
                     }
@@ -118,7 +129,7 @@ class OauthMicroserviceAuthenticator extends AbstractAuthenticator
                 $user = new UserWithIdentity();
                 $user->setUsername($decodedJwt->claims()->get('sub'))
                     ->setPassword('null')
-                    ->setIdentityId($decodedJwt->claims()->get('identity'))
+                    ->setIdentityId($identityId)
                 ;
 
                 /**
