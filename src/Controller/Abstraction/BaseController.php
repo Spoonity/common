@@ -9,9 +9,11 @@
 namespace Spoonity\Controller\Abstraction;
 
 use Doctrine\Persistence\ManagerRegistry;
+use Spoonity\Service\JwtService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Class BaseController
@@ -25,14 +27,24 @@ abstract class BaseController extends AbstractController
     /** @var EventDispatcherInterface  */
     protected EventDispatcherInterface $dispatcher;
 
+    /** @var JwtService  */
+    protected JwtService $jwtService;
+
+    /** @var RequestStack  */
+    protected RequestStack $requestStack;
+
     /**
      * @param ManagerRegistry $manager
      * @param EventDispatcherInterface $dispatcher
+     * @param JwtService $jwtService
+     * @param RequestStack $requestStack
      */
-    public function __construct(ManagerRegistry $manager, EventDispatcherInterface $dispatcher)
+    public function __construct(ManagerRegistry $manager, EventDispatcherInterface $dispatcher, JwtService $jwtService, RequestStack $requestStack)
     {
         $this->manager = $manager;
         $this->dispatcher = $dispatcher;
+        $this->jwtService = $jwtService;
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -97,5 +109,23 @@ abstract class BaseController extends AbstractController
     public function getContent(Request $request): array
     {
         return json_decode(($request->getContent()), true);
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getIdentityId(): ?int
+    {
+        $identityId = null;
+
+        try {
+            $decoded = $this->jwtService->decode(str_replace('Bearer ','', $this->requestStack->getCurrentRequest()->headers->get('Authorization')));
+            $identityId = $decoded->claims()->get('identity');
+
+        } catch(\Exception $e) {
+            // do nothing.
+        }
+
+        return $identityId;
     }
 }
