@@ -1,1 +1,0 @@
-Use this directory for registering common schema files for validating requests to external services.
