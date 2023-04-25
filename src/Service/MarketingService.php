@@ -52,7 +52,8 @@ class MarketingService
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             sprintf('Authorization: Bearer %s', $this->authenticate()),
-            sprintf("Content-Size: %d", strlen($content))
+            sprintf("Content-Size: %d", strlen($content)),
+            sprintf("Identity: %d", $identityId)
         ]);
 
         curl_setopt($ch, CURLOPT_URL, 'https://marketing.spoonity.com/notifications/email');
@@ -114,12 +115,8 @@ class MarketingService
 
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
             'grant_type' => 'client_credentials',
-            'client_id' => ($this->container->hasParameter('oauth.root.client_id')) ?
-                $this->container->getParameter('oauth.root.client_id') :
-                null,
-            'client_secret' => ($this->container->hasParameter('oauth.root.client_secret')) ?
-                $this->container->getParameter('oauth.root.client_secret') :
-                null,
+            'client_id' => $this->getRootClientId(),
+            'client_secret' => $this->getRootClientSecret(),
             'scope' => 'root'
         ]));
 
@@ -169,5 +166,31 @@ class MarketingService
         }
 
         return $token['access_token'];
+    }
+
+    /**
+     * @return string|null
+     */
+    private function getRootClientId(): ?string
+    {
+        return (
+            $this->container->hasParameter('oauth') &&
+            is_array($this->container->getParameter('oauth')) &&
+            array_key_exists('root', $this->container->getParameter('oauth')) &&
+            array_key_exists('client_id', $this->container->getParameter('oauth')['root'])
+        ) ? $this->container->getParameter('oauth')['root']['client_id'] : null;
+    }
+
+    /**
+     * @return string|null
+     */
+    private function getRootClientSecret(): ?string
+    {
+        return (
+            $this->container->hasParameter('oauth') &&
+            is_array($this->container->getParameter('oauth')) &&
+            array_key_exists('root', $this->container->getParameter('oauth')) &&
+            array_key_exists('client_secret', $this->container->getParameter('oauth')['root'])
+        ) ? $this->container->getParameter('oauth')['root']['client_secret'] : null;
     }
 }
