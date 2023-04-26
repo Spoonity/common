@@ -20,11 +20,13 @@ use Spoonity\Exception;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Spoonity\Service\JwtService;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -60,11 +62,13 @@ abstract class BaseOauthController extends BaseController
     /**
      * @param ManagerRegistry $manager
      * @param EventDispatcherInterface $dispatcher
+     * @param JwtService $jwtService
+     * @param RequestStack $requestStack
      * @param ContainerInterface $container
      */
-    public function __construct(ManagerRegistry $manager, EventDispatcherInterface $dispatcher, ContainerInterface $container)
+    public function __construct(ManagerRegistry $manager, EventDispatcherInterface $dispatcher, JwtService $jwtService, RequestStack $requestStack, ContainerInterface $container)
     {
-        parent::__construct($manager, $dispatcher);
+        parent::__construct($manager, $dispatcher, $jwtService, $requestStack);
 
         /** @var ClientRepositoryInterface $clientRepository */
         $clientRepository = $manager->getRepository($container->getParameter('oauth')['client_entity']);
