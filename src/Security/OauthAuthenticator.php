@@ -72,6 +72,10 @@ class OauthAuthenticator extends AbstractAuthenticator
                 $routeParams = $request->attributes->get('_route_params');
                 $routeScopes = $routeParams['oauth_scopes'] ?? [];
 
+                if($decodedJwt === null) {
+                    throw new Exception\UnauthorizedException();
+                }
+
                 /**
                  * compare scopes on route with scopes on token.
                  */

@@ -49,12 +49,13 @@ class JwtService
 
     /**
      * @param string $identifier
-     * @return Token
+     * @return Token|null
      */
-    public function decode(string $identifier): Token
+    public function decode(string $identifier): ?Token
     {
         try {
             $token = $this->jwtConfiguration->parser()->parse($identifier);
+            $this->jwtConfiguration->validator()->assert($token, ...$this->jwtConfiguration->validationConstraints());
 
         } catch(\Exception $e) {
             $token = null;

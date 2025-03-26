@@ -81,9 +81,14 @@ class OauthMicroserviceAuthenticator extends AbstractAuthenticator
                  * decode JWT from identifier.
                  */
                 $decodedJwt = $this->jwtConfiguration->parser()->parse($identifier);
+
                 $routeParams = $request->attributes->get('_route_params');
                 $routeScopes = $routeParams['oauth_scopes'] ?? [];
                 $identityId = $decodedJwt->claims()->has('identity') ? $decodedJwt->claims()->get('identity') : null;
+
+                if(false === $this->jwtConfiguration->validator()->validate($decodedJwt, ...$this->jwtConfiguration->validationConstraints())) {
+                    throw new Exception\UnauthorizedException();
+                }
 
                 /**
                  * compare scopes on route with scopes on token.
