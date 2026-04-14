@@ -3,8 +3,6 @@
 
 namespace Spoonity\Service\Abstraction;
 
-
-use Spoonity\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -14,7 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 abstract class BaseSearchService
 {
     /** @var EntityManagerInterface  */
-    private $manager;
+    private EntityManagerInterface $manager;
 
     /**
      * ExpansionSearchService constructor.
@@ -31,30 +29,12 @@ abstract class BaseSearchService
      * @param int $limit
      * @param array $order
      * @return array
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function search(string $query, int $offset, int $limit, array $order = []): array
     {
         $entities = [];
-        $criteria = [];
-        $matches = [];
-
-        /**
-         * break the query into blocks of criteria to be evaluated.
-         */
-        preg_match_all($this->getSearchExpression(), $query, $matches);
-
-        foreach($matches as $items) {
-            foreach($items as $item) {
-                $parts = explode(':', $item);
-
-                if(sizeof($parts) !== 2) {
-                    continue;
-                }
-
-                $criteria[$parts[0]][] = $parts[1];
-            }
-        }
+        $criteria = $this->getCriteriaStructure($query);
 
         /**
          * get search-friendly base query.
@@ -72,11 +52,7 @@ abstract class BaseSearchService
             ;
         ", (!empty($order)) ? sprintf(", q.%s", array_keys($order)[0]): '', $this->getEntityTableName(), $this->getSearchInnerQuery(), $this->evaluateCriteriaAsSql($criteria), $this->evaluateOrder($order), $offset, $limit));
 
-        if(!$stmt->execute()) {
-            throw new Exception\DbException();
-        }
-
-        $results = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        $results = $stmt->executeQuery()->fetchFirstColumn();
 
         foreach($results as $result) {
             $entities[] = $this->getManager()->getRepository($this->getEntityClassName())->find($result);
@@ -138,6 +114,35 @@ abstract class BaseSearchService
         }
 
         return $sql;
+    }
+
+    /**
+     * @param string $query
+     * @return array
+     */
+    public function getCriteriaStructure(string $query): array
+    {
+        $criteria = [];
+        $matches = [];
+
+        /**
+         * break the query into blocks of criteria to be evaluated.
+         */
+        preg_match_all($this->getSearchExpression(), $query, $matches);
+
+        foreach($matches as $items) {
+            foreach($items as $item) {
+                $parts = explode(':', $item);
+
+                if(sizeof($parts) !== 2) {
+                    continue;
+                }
+
+                $criteria[$parts[0]][] = $parts[1];
+            }
+        }
+
+        return $criteria;
     }
 
     /**

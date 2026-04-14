@@ -16,13 +16,14 @@ namespace Spoonity\Entity\Abstraction;
 trait Dated
 {
     /** @var \DateTIme */
-    private $dateCreated;
+    protected \DateTime $dateCreated;
 
     /** @var \DateTime */
-    private $dateUpdated;
+    protected \DateTime $dateUpdated;
 
     /**
      * @return \DateTime
+     * @throws \Exception
      */
     public function getDateCreated(): \DateTime
     {
@@ -31,6 +32,7 @@ trait Dated
 
     /**
      * @return \DateTime
+     * @throws \Exception
      */
     public function getDateUpdated(): \DateTime
     {
@@ -39,6 +41,7 @@ trait Dated
 
     /**
      * @return $this
+     * @throws \Exception
      */
     public function setDefaultDateCreated(): self
     {
@@ -49,6 +52,7 @@ trait Dated
 
     /**
      * @return $this
+     * @throws \Exception
      */
     public function setDefaultDateUpdated(): self
     {

@@ -4,6 +4,7 @@
 namespace Spoonity\Service;
 
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -14,6 +15,27 @@ class IdentityService
 {
     const CREDENTIAL_TYPE_TRANSACTIONAL = 'transactional';
     const CREDENTIAL_TYPE_WAREHOUSE = 'warehouse';
+
+    /** @var ContainerInterface  */
+    private ContainerInterface $container;
+
+    /** @var string  */
+    private string $endpoint = 'https://identity.spoonity.com';
+
+    /**
+     * @param ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+
+        if(
+            $this->container->getParameter('identity') != null &&
+            in_array('endpoint', array_keys($this->container->getParameter('identity')))
+        ) {
+            $this->endpoint = $this->container->getParameter('identity')['endpoint'];
+        }
+    }
 
     /**
      * @param string $token
@@ -31,7 +53,11 @@ class IdentityService
             sprintf('Authorization: Bearer %s', $token)
         ]);
 
-        curl_setopt($ch, CURLOPT_URL, sprintf("https://identity.spoonity.com/identities/?page=%d&limit=%d", $page, $limit));
+        curl_setopt($ch, CURLOPT_URL, sprintf("%s/identities/all?page=%d&limit=%d",
+            $this->endpoint,
+            $page,
+            $limit
+        ));
 
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
@@ -90,7 +116,8 @@ class IdentityService
             sprintf('Authorization: Bearer %s', $token)
         ]);
 
-        curl_setopt($ch, CURLOPT_URL, sprintf("https://identity.spoonity.com/identities/%d/credentials?q=t:%s",
+        curl_setopt($ch, CURLOPT_URL, sprintf("%s/identities/%d/credentials?q=t:%s",
+            $this->endpoint,
             $identityId,
             $type
         ));

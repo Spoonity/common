@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Kernel;
 trait Descriptive
 {
     /** @var array */
-    private $metaTree;
+    protected array $metaTree;
 
     /**
      * @return int
@@ -32,13 +32,20 @@ trait Descriptive
      */
     public function getMeta(string $field, bool $return = false)
     {
-        /** @var Kernel $kernel */
-        global $kernel;
+        /** @var Kernel $app */
+        global $app;
+
+        /**
+         * handle console apps.
+         */
+        if(get_class($app) == 'Symfony\Bundle\FrameworkBundle\Console\Application') {
+            $app = $app->getKernel();
+        }
 
         $metaEntity = sprintf('%sMeta', ucfirst(self::class));
 
         /** @var Meta $meta */
-        $meta = $kernel->getContainer()->get('doctrine')->getManager()->getRepository($metaEntity)
+        $meta = $app->getContainer()->get('doctrine')->getManager()->getRepository($metaEntity)
             ->findOneBy([
                 strtolower(str_replace('App\Entity\\', '', self::class)) => $this->getId(),
                 'field' => $field
@@ -57,8 +64,15 @@ trait Descriptive
      */
     public function setMeta(string $field, string $value1, string $value2 = null, bool $override = true): self
     {
-        /** @var Kernel $kernel */
-        global $kernel;
+        /** @var Kernel $app */
+        global $app;
+
+        /**
+         * handle console apps.
+         */
+        if(get_class($app) == 'Symfony\Bundle\FrameworkBundle\Console\Application') {
+            $app = $app->getKernel();
+        }
 
         $className = $this->getMetaClassName();
         $methodName = sprintf('set%s', ucfirst($this->getRootEntityName()));
@@ -67,7 +81,7 @@ trait Descriptive
         $meta = new $className;
 
         if($override) {
-            $meta = $kernel->getContainer()->get('doctrine')->getManager()->getRepository($className)
+            $meta = $app->getContainer()->get('doctrine')->getManager()->getRepository($className)
                 ->findOneBy([
                     $this->getRootEntityName() => $this->getId(),
                     'field' => $field
@@ -95,12 +109,12 @@ trait Descriptive
      */
     public function deleteMeta(string $field): bool
     {
-        /** @var Kernel $kernel */
-        global $kernel;
+        /** @var Kernel $app */
+        global $app;
 
         $className = $this->getMetaClassName();
 
-        $meta = $kernel->getContainer()->get('doctrine')->getManager()->getRepository($className)
+        $meta = $app->getContainer()->get('doctrine')->getManager()->getRepository($className)
             ->findOneBy([
                 $this->getRootEntityName() => $this->getId(),
                 'field' => $field
@@ -120,8 +134,15 @@ trait Descriptive
      */
     public function getMetaTree(bool $force = false): array
     {
-        /** @var Kernel $kernel */
-        global $kernel;
+        /** @var Kernel $app */
+        global $app;
+
+        /**
+         * handle console apps.
+         */
+        if(get_class($app) == 'Symfony\Bundle\FrameworkBundle\Console\Application') {
+            $app = $app->getKernel();
+        }
 
         if($this->metaTree !== null && !$force) {
             return $this->metaTree;
@@ -133,7 +154,7 @@ trait Descriptive
         /**
          * build the entire metadata tree for this resource.
          */
-        $meta = $kernel->getContainer()->get('doctrine')->getManager()->getRepository($metaEntity)
+        $meta = $app->getContainer()->get('doctrine')->getManager()->getRepository($metaEntity)
             ->findBy([
                 strtolower(str_replace('App\Entity\\', '', self::class)) => $this->getId(),
             ])

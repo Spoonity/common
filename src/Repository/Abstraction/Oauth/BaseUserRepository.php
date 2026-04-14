@@ -1,0 +1,47 @@
+<?php
+
+namespace Spoonity\Repository\Abstraction\Oauth;
+
+use League\OAuth2\Server\Entities\ClientEntityInterface;
+use League\OAuth2\Server\Repositories\UserRepositoryInterface;
+use Spoonity\Entity\User;
+use Spoonity\Repository\Abstraction\BaseRepository;
+
+/**
+ * Class BaseUserRepository
+ * @package Spoonity\Repository\Abstraction\Oauth
+ */
+abstract class BaseUserRepository extends BaseRepository implements UserRepositoryInterface
+{
+    /**
+     * @param string $username
+     * @return User|null
+     */
+    public function findOneByUsername(string $username): ?User
+    {
+        return $this->findOneBy([
+            'username' => $username
+        ]);
+    }
+
+    /**
+     * @param $username
+     * @param $password
+     * @param $grantType
+     * @param ClientEntityInterface $clientEntity
+     * @return User|null
+     */
+    public function getUserEntityByUserCredentials($username, $password, $grantType, ClientEntityInterface $clientEntity): ?User
+    {
+        $user = $this->findOneByUsername($username);
+
+        if(
+            $user === null ||
+            !$user->isPassword($password)
+        ) {
+            return null;
+        }
+
+        return $user;
+    }
+}
