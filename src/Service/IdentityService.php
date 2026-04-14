@@ -31,7 +31,11 @@ class IdentityService
             sprintf('Authorization: Bearer %s', $token)
         ]);
 
-        curl_setopt($ch, CURLOPT_URL, sprintf("https://identity.spoonity.com/identities/all?page=%d&limit=%d", $page, $limit));
+        curl_setopt($ch, CURLOPT_URL, sprintf("%s/identities/all?page=%d&limit=%d",
+            (getenv('IDENTITY_ENDPOINT') != null) ? getenv('IDENTITY_ENDPOINT') : 'https://identity.spoonity.com',
+            $page,
+            $limit
+        ));
 
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
@@ -90,7 +94,8 @@ class IdentityService
             sprintf('Authorization: Bearer %s', $token)
         ]);
 
-        curl_setopt($ch, CURLOPT_URL, sprintf("https://identity.spoonity.com/identities/%d/credentials?q=t:%s",
+        curl_setopt($ch, CURLOPT_URL, sprintf("%s/identities/%d/credentials?q=t:%s",
+            (getenv('IDENTITY_ENDPOINT') != null) ? getenv('IDENTITY_ENDPOINT') : 'https://identity.spoonity.com',
             $identityId,
             $type
         ));
