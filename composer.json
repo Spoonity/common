@@ -9,13 +9,12 @@
         }
     ],
     "require": {
-        "php": ">=7.4",
         "ext-json": "*",
         "ext-curl": "*",
         "ext-pdo": "*",
         "doctrine/orm": "*",
         "symfony/framework-bundle": "^5.0.0",
-        "symfony/orm-pack": "^1.0",
+        "symfony/orm-pack": "^2.3",
         "twig/twig": "^2.0",
         "symfony/yaml": "^5.0",
         "google/cloud-pubsub": "^1.21",
